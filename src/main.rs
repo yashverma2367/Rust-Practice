@@ -1,23 +1,19 @@
-mod counter;
+#[derive(Debug, Copy, Clone)]
+struct Point {
+    x: i32,
+    y: i32,
+}
 
-use counter::Counter;
+impl std::ops::Add for Point {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self { x: self.x + other.x, y: self.y + other.y }
+    }
+}
 
 fn main() {
-    let mut ctr = Counter::new();
-    ctr.count(13);
-    ctr.count(14);
-    ctr.count(16);
-    ctr.count(14);
-    ctr.count(14);
-    ctr.count(11);
-
-    for i in 10..20 {
-        println!("saw {} values equal to {}", ctr.times_seen(&i), i);
-    }
-
-    let mut strctr = Counter::new();
-    strctr.count("apple");
-    strctr.count("orange");
-    strctr.count("apple");
-    println!("got {} apples", strctr.times_seen(&"apple"));
+    let p1 = Point { x: 10, y: 20 };
+    let p2 = Point { x: 100, y: 200 };
+    println!("{p1:?} + {p2:?} = {:?}", p1 + p2);
 }
