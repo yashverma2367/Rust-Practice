@@ -1,17 +1,5 @@
-mod read_and_write;
+mod default_update_struct_syntax;
 
 fn main() {
-    let read_result = read_and_write::read();
-
-    match read_result {
-        Ok(_) => println!("Read data successfully"),
-        Err(err) => println!("Error: {}", err),
-    }
-
-    let write_results = read_and_write::write();
-
-    match write_results {
-        Ok(_) => println!("Read data successfully"),
-        Err(err) => println!("Error: {}", err),
-    }
+    default_update_struct_syntax::temp()
 }
