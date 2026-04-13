@@ -1,5 +1,4 @@
-mod from_and_into;
+mod casting;
 fn main() {
-    from_and_into::from();
-    from_and_into::into();
+    casting::casting(1000000);
 }
