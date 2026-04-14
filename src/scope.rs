@@ -11,6 +11,7 @@ pub fn tranfer_ownership() {
 pub fn out_of_scope() {
     {
         let n = String::from("Yash");
+        println!("{n}");
     }
     // println!("{n}"); //NOT GONNA WORK BECAUSE OUT OF SCOPE
 }
@@ -35,6 +36,6 @@ struct Point(i32, i32);
 pub fn copy_types() {
     let p1 = Point(3, 4);
     let p2 = p1; //Also copies the types over
-    println!("p1: {p1:?}");
-    println!("p2: {p2:?}");
+    println!("p1: {p1:?}, {}, {}", p1.0, p1.1);
+    println!("p2: {p2:?}, {}, {}", p2.0, p1.1);
 }

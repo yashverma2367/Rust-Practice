@@ -1,11 +1,7 @@
-mod scope;
+mod drop;
+
 fn main() {
-    scope::tranfer_ownership();
-
-    scope::move_ownership();
-
-    scope::clone_value();
-
-    scope::copy_types();
-    println!("Memory Management")
+    drop::use_drop();
+    println!("Dropping Scope");
 }
+
