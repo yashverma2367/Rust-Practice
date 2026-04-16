@@ -1,7 +1,8 @@
 mod smart_pointers;
 
-use smart_pointers::box_test;
+use smart_pointers::{use_box, use_rc};
 
 fn main() {
-    box_test();
+    use_box();
+    use_rc();
 }
