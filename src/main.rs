@@ -1,16 +1,7 @@
-mod package_builder;
+mod smart_pointers;
 
-use package_builder::{PackageBuilder, Dependency, Language};
+use smart_pointers::box_test;
 
 fn main() {
-    let base64 = PackageBuilder::new("axios")
-        .version("1.15.0")
-        .authors(vec!["exploiters".to_string()])
-        .dependency(Dependency {
-            name: "exploit".to_string(),
-            version_expression: "15".to_string(),
-        })
-        .language(Language::Rust)
-        .build();
-    dbg!(base64);
+    box_test();
 }
