@@ -1,89 +1,91 @@
-use std::cmp::Ordering;
-
-/// A node in the binary tree.
-#[derive(Debug)]
-struct Node<T: Ord> {
-    value: T,
-    left: Subtree<T>,
-    right: Subtree<T>,
+struct Spell {
+    name: String,
+    cost: u32,
+    uses: u32,
 }
 
-/// A possibly-empty subtree.
-#[derive(Debug)]
-struct Subtree<T: Ord>(Option<Box<Node<T>>>);
-
-/// A container storing a set of values, using a binary tree.
-///
-/// If the same value is added multiple times, it is only stored once.
-#[derive(Debug)]
-pub struct BinaryTree<T: Ord> {
-    root: Subtree<T>,
+struct Wizard {
+    spells: Vec<Spell>,
+    mana: u32,
 }
 
-impl<T: Ord> BinaryTree<T> {
-    fn new() -> Self {
-        Self {
-            root: Subtree::new(),
+impl Wizard {
+    fn new(mana: u32) -> Self {
+        Wizard {
+            spells: vec![],
+            mana,
         }
     }
 
-    fn insert(&mut self, value: T) {
-        self.root.insert(value);
+    // TODO: Implement `add_spell` to take ownership of a spell and add it to
+    // the wizard's inventory.
+    fn add_spell(&mut self, spell: Spell) {
+        self.spells.push(spell);
     }
 
-    fn has(&self, value: &T) -> bool {
-        self.root.has(value)
-    }
-
-    fn len(&self) -> usize {
-        self.root.len()
-    }
-}
-
-// Implement `new` for `Node`.
-impl<T: Ord> Subtree<T> {
-    fn new() -> Self {
-        Self(None)
-    }
-
-    fn insert(&mut self, value: T) {
-        match &mut self.0 {
-            None => self.0 = Some(Box::new(Node::new(value))),
-            Some(n) => match value.cmp(&n.value) {
-                Ordering::Less => n.left.insert(value),
-                Ordering::Equal => {}
-                Ordering::Greater => n.right.insert(value),
-            },
+    // TODO: Implement `cast_spell` to borrow a spell from the inventory and
+    // cast it. The wizard's mana should decrease by the spell's cost and the
+    // number of uses for the spell should decrease by 1.
+    //
+    // If the wizard doesn't have enough mana, the spell should fail.
+    // If the spell has no uses left, it is removed from the inventory.
+    fn cast_spell(&mut self, name: &str) {
+        let mut spell_idx = None;
+        for spell in 0..self.spells.len() {
+            if self.spells[spell].name == name {
+                spell_idx = Some(spell);
+                break;
+            }
         }
-    }
-
-    fn has(&self, value: &T) -> bool {
-        match &self.0 {
-            None => false,
-            Some(n) => match value.cmp(&n.value) {
-                Ordering::Less => n.left.has(value),
-                Ordering::Equal => true,
-                Ordering::Greater => n.right.has(value),
-            },
+        if spell_idx == None {
+            println!("Spell {} not Found", name);
+            return;
         }
-    }
 
-    fn len(&self) -> usize {
-        match &self.0 {
-            None => 0,
-            Some(n) => 1 + n.left.len() + n.right.len(),
+        let uses = self.spells[spell_idx.unwrap()].uses;
+        let cost = self.spells[spell_idx.unwrap()].cost;
+
+        if uses <= 0 {
+            println!("Spell {} doesn't have any uses left", name);
+            return;
         }
+        if cost > self.mana {
+            println!("Dont have enought mana for {}", name);
+            return;
+        }
+        let spell_in_memory = &mut self.spells[spell_idx.unwrap()];
+        spell_in_memory.uses -= 1;
+        self.mana = self.mana - cost;
+
+        if spell_in_memory.uses == 0 {
+            self.spells.remove(spell_idx.unwrap());
+        }
+        return;
     }
 }
 
-impl<T: Ord> Node<T> {
-    fn new(value: T) -> Self {
-        Self {
-            value,
-            left: Subtree::new(),
-            right: Subtree::new(),
-        }
-    }
+fn main() {
+    let mut merlin = Wizard::new(100);
+    let fireball = Spell {
+        name: String::from("Fireball"),
+        cost: 10,
+        uses: 2,
+    };
+    let ice_blast = Spell {
+        name: String::from("Ice Blast"),
+        cost: 15,
+        uses: 1,
+    };
+
+    merlin.add_spell(fireball);
+
+    merlin.add_spell(ice_blast);
+
+    merlin.cast_spell("Fireball"); // Casts successfully
+    merlin.cast_spell("Ice Blast"); // Casts successfully, then removed
+    merlin.cast_spell("Ice Blast"); // Fails (not found)
+    merlin.cast_spell("Fireball"); // Casts successfully, then removed
+    merlin.cast_spell("Fireball"); // Fails (not found)
 }
 
 #[cfg(test)]
@@ -91,49 +93,68 @@ mod tests {
     use super::*;
 
     #[test]
-    fn len() {
-        let mut tree = BinaryTree::new();
-        assert_eq!(tree.len(), 0);
-        tree.insert(2);
-        assert_eq!(tree.len(), 1);
-        tree.insert(1);
-        assert_eq!(tree.len(), 2);
-        tree.insert(2); // not a unique item
-        assert_eq!(tree.len(), 2);
-        tree.insert(3);
-        assert_eq!(tree.len(), 3);
+    fn test_add_spell() {
+        let mut wizard = Wizard::new(10);
+        let spell = Spell {
+            name: String::from("Fireball"),
+            cost: 5,
+            uses: 3,
+        };
+        wizard.add_spell(spell);
+        assert_eq!(wizard.spells.len(), 1);
     }
 
     #[test]
-    fn has() {
-        let mut tree = BinaryTree::new();
-        fn check_has(tree: &BinaryTree<i32>, exp: &[bool]) {
-            let got: Vec<bool> = (0..exp.len()).map(|i| tree.has(&(i as i32))).collect();
-            assert_eq!(&got, exp);
-        }
+    fn test_cast_spell() {
+        let mut wizard = Wizard::new(10);
+        let spell = Spell {
+            name: String::from("Fireball"),
+            cost: 5,
+            uses: 3,
+        };
+        wizard.add_spell(spell);
 
-        check_has(&tree, &[false, false, false, false, false]);
-        tree.insert(0);
-        check_has(&tree, &[true, false, false, false, false]);
-        tree.insert(4);
-        check_has(&tree, &[true, false, false, false, true]);
-        tree.insert(4);
-        check_has(&tree, &[true, false, false, false, true]);
-        tree.insert(3);
-        check_has(&tree, &[true, false, false, true, true]);
+        wizard.cast_spell("Fireball");
+        assert_eq!(wizard.mana, 5);
+        assert_eq!(wizard.spells.len(), 1);
+        assert_eq!(wizard.spells[0].uses, 2);
     }
 
     #[test]
-    fn unbalanced() {
-        let mut tree = BinaryTree::new();
-        for i in 0..100 {
-            tree.insert(i);
-        }
-        assert_eq!(tree.len(), 100);
-        assert!(tree.has(&50));
-    }
-}
+    fn test_cast_spell_insufficient_mana() {
+        let mut wizard = Wizard::new(10);
+        let spell = Spell {
+            name: String::from("Fireball"),
+            cost: 15,
+            uses: 3,
+        };
+        wizard.add_spell(spell);
 
-fn main() {
-    println!("lay");
+        wizard.cast_spell("Fireball");
+        assert_eq!(wizard.mana, 10);
+        assert_eq!(wizard.spells.len(), 1);
+        assert_eq!(wizard.spells[0].uses, 3);
+    }
+
+    #[test]
+    fn test_cast_spell_not_found() {
+        let mut wizard = Wizard::new(10);
+        wizard.cast_spell("Fireball");
+        assert_eq!(wizard.mana, 10);
+    }
+
+    #[test]
+    fn test_cast_spell_removal() {
+        let mut wizard = Wizard::new(10);
+        let spell = Spell {
+            name: String::from("Fireball"),
+            cost: 5,
+            uses: 1,
+        };
+        wizard.add_spell(spell);
+
+        wizard.cast_spell("Fireball");
+        assert_eq!(wizard.mana, 5);
+        assert_eq!(wizard.spells.len(), 0);
+    }
 }
